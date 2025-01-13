@@ -2,9 +2,12 @@
 
 DROP FUNCTION IF EXISTS count_internal_use;
 	
-CREATE FUNCTION count_internal_use(barcode bigint)
+CREATE FUNCTION count_internal_use(
+	barcode bigint
+)
 returns table(
-	internal_use_count integer)
+	internal_use_count integer
+)
 as $$
 select count(cit.id) AS internal_use_count
   from folio_circulation.check_in__t__ as cit JOIN folio_inventory.item__t__ as itt ON cit.item_id = itt.id
