@@ -1,8 +1,8 @@
 --metadb:function count_internal_use
 
-DROP FUNCTION IF EXISTS lrickards.count_internal_use
+DROP FUNCTION IF EXISTS count_internal_use
 	
-CREATE FUNCTION lrickards.count_internal_use(
+CREATE FUNCTION count_internal_use(
     barcode bigint)
 returns table(
 	internal_use_count integer)
