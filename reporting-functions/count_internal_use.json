@@ -1,1 +1,13 @@
-
+{
+    "displayName": "List internal use count for a given barcoded item",
+    "description": "Created by Lev and David as a proof of concept for counting internal use",
+    "instructions": "Enter a barcode for the item in question.",
+    "parameters": [
+        {
+            "name": "barcode",
+            "displayName": "Item Barcode",
+            "type": "bigint",
+            "required": true
+        }
+    ]
+}
