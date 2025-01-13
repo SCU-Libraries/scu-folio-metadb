@@ -12,7 +12,7 @@ select count(cit.id)
 	WHERE
 		itt.__current = true and
 		itt.barcode = barcode and
-		item_status_prior_to_check_in = 'Available'
+		cit.item_status_prior_to_check_in = 'Available'
 $$
 language sql
 STABLE 
