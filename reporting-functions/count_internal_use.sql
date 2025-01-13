@@ -2,7 +2,7 @@
 
 DROP FUNCTION IF EXISTS count_internal_use
 	
-CREATE FUNCTION count_internal_use(
+CREATE FUNCTION lrickards.count_internal_use(
     barcode bigint)
 returns table(
 	internal_use_count integer)
