@@ -3,7 +3,7 @@
 DROP FUNCTION IF EXISTS count_internal_use;
 	
 CREATE FUNCTION count_internal_use(
-	barcode bigint
+	barcode text
 )
 returns table(
 	internal_use_count integer
