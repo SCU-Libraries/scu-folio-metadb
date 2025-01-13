@@ -7,7 +7,7 @@ CREATE FUNCTION lrickards.count_internal_use(
 returns table(
 	internal_use_count integer)
 as $$
-select count(cit.id)
+select count(cit.id) AS internal_use_count
 	from folio_circulation.check_in__t__ cit JOIN folio_inventory.item__t__ itt ON cit.item_id = itt.id
 	WHERE
 		itt.__current = true and
