@@ -4,9 +4,9 @@
     "instructions": "Enter a barcode for the item in question.",
     "parameters": [
         {
-            "name": "barcode",
+            "name": "barcode_to_check",
             "displayName": "Item Barcode",
-            "type": "bigint",
+            "type": "text",
             "required": true
         }
     ]
