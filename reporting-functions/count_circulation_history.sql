@@ -6,12 +6,10 @@ CREATE FUNCTION count_circulation_history(
 	barcode_to_check text
 )
 returns table(
-	circulation_start_timestamp date,
-	circulation_end_timestamp date, 
 	circulation_history_count integer
 )
 as $$
-select cit.__start as circulation_start_timestamp, cit.__end as circulation_end_timestamp, count(cit.id) AS circulation_history_count
+select count(cit.id) AS circulation_history_count
   from folio_circulation.check_in__t__ as cit JOIN folio_inventory.item__t__ as itt ON cit.item_id = itt.id
   WHERE
     itt.__current = true and
