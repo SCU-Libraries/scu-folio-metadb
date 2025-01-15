@@ -8,8 +8,8 @@ CREATE FUNCTION count_circulation_history(
   	end_date date DEFAULT '2099-01-01'
 )
 returns table(
-	circulation_history_count text,
-	date_to_display date
+	Check_In_ID text,
+	Check_In_Date date
 )
 as $$
 select cit.id AS circulation_history_count, cit.occurred_date_time as date_to_display
