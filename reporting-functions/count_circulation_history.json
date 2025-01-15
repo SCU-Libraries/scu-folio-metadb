@@ -8,6 +8,18 @@
             "displayName": "Item Barcode",
             "type": "text",
             "required": true
+        },
+        {
+            "name": "start_date",
+            "displayName": "Earliest date of circulation activity"
+            "type": "date",
+            "required": false
+        },
+        {
+            "name": "end_date",
+            "displayName": "Latest date of user creation",
+            "type": "date",
+            "required": false
         }
     ]
 }
