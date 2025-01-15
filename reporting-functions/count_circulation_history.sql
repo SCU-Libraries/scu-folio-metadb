@@ -12,7 +12,7 @@ returns table(
 	Check_In_Date date
 )
 as $$
-select cit.id AS circulation_history_count, cit.occurred_date_time as date_to_display
+select cit.id AS Check_In_ID, cit.occurred_date_time as Check_In_Date
   from folio_circulation.check_in__t__ as cit JOIN folio_inventory.item__t__ as itt ON cit.item_id = itt.id
   WHERE
     itt.__current = true and
