@@ -1,5 +1,5 @@
 {
-    "displayName": "List circulation history for a given barcoded item",
+    "displayName": "Display circulation history for a given barcoded item",
     "description": "Created by Lev as a proof of concept for displaying circulation history",
     "instructions": "Enter a barcode for the item in question.",
     "parameters": [
