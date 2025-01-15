@@ -11,7 +11,7 @@
         },
         {
             "name": "start_date",
-            "displayName": "Earliest date of circulation activity"
+            "displayName": "Earliest date of circulation activity",
             "type": "date",
             "required": false
         },
