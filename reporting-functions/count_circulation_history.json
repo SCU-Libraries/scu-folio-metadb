@@ -1,7 +1,7 @@
 {
     "displayName": "Display circulation history for a given barcoded item",
     "description": "Created by Lev as a proof of concept for displaying circulation history",
-    "instructions": "Enter a barcode for the item in question, and specify the dates between which you want to review circulation history.",
+    "instructions": "Enter a barcode for the item in question and specify the dates between which you want to review circulation history.",
     "parameters": [
         {
             "name": "barcode_to_check",
