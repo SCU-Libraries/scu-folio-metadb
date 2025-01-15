@@ -7,7 +7,7 @@ CREATE FUNCTION count_circulation_history(
 	start_date date DEFAULT '2000-01-01',
   	end_date date DEFAULT '2099-01-01'
 )
-returns "The following table displays the circulation incident ID and the date it was checked in.", table(
+returns table(
 	circulation_history_count text,
 	date_to_display date
 )
