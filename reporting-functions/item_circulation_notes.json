@@ -1,5 +1,6 @@
 {
     "displayName": "Display item circulation notes",
     "description": "Copied from the folio-org/folio-analytics GitHub repository",
-    "instructions": "I believe this one runs straight out of the box with no input..."
+    "instructions": "I believe this one runs straight out of the box with no input...",
+    "parameters": []
 }
