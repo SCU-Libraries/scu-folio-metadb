@@ -1,6 +1,6 @@
---metadb:function zero_use_items; not currently in a usable state
+--metadb:function pop_usage; not currently in a usable state
 
-DROP FUNCTION IF EXISTS zero_use_items;
+DROP FUNCTION IF EXISTS pop_usage;
 	
 CREATE FUNCTION zero_use_items(
 	start_date date DEFAULT '2000-01-01',
