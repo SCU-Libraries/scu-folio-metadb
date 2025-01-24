@@ -15,8 +15,16 @@ returns table(
 )
 as $$
 select cit.id AS Check_In_ID, cit.occurred_date_time as Check_In_Date
-  from folio_circulation.check_in__t__ as cit JOIN folio_inventory.item__t__ as itt ON cit.item_id = itt.id
-  WHERE
+
+FROM
+	folio_notes.note__ as n
+	LEFT JOIN SOMETHING ON n.id = 
+    folio_inventory.instance__t
+    LEFT JOIN folio_inventory.holdings__t ON instance__t.SOMETHING = holdings__t.SOMETHING
+    LEFT JOIN folio_inventory.item__t ON holdings__t.SOMETHING = item__t.SOMETHING
+	
+	WHERE
+	folio_notes.note__
     itt.__current = true and
     itt.barcode = barcode_to_check and
     cit.item_status_prior_to_check_in = 'Checked out' and
