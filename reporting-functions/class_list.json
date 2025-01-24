@@ -1,1 +1,13 @@
-
+{
+    "displayName": "Display class list based on item note",
+    "description": "Display items for an Archives & Special Collections class by searching item notes",
+    "instructions": "Enter a search string for item note",
+    "parameters": [
+        {
+            "name": "note_string",
+            "displayName": "Item Note Contains",
+            "type": "text",
+            "required": true
+        }
+    ]
+}
