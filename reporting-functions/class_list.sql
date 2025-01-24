@@ -3,13 +3,15 @@
 DROP FUNCTION IF EXISTS class_list;
 	
 CREATE FUNCTION class_list(
-	barcode_to_check text,
-	start_date date DEFAULT '2000-01-01',
-  	end_date date DEFAULT '2099-01-01'
+	note_string text
 )
 returns table(
-	Check_In_ID text,
-	Check_In_Date date
+	item_shelving_location test,
+	call_number text,
+	item_volume_number text,
+	instance_author text,
+	instance_title text,
+	instance_publication_info text
 )
 as $$
 select cit.id AS Check_In_ID, cit.occurred_date_time as Check_In_Date
