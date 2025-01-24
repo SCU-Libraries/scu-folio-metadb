@@ -14,17 +14,15 @@ returns table(
 	instance_publication_info text
 )
 as $$
-select cit.id AS Check_In_ID, cit.occurred_date_time as Check_In_Date
+select i.effective_location_id AS item_shelving_location, i.effective_shelving_order as call_number, i.volume as item_volume_number, instance.author as instance_author, instance.title as instnace_title, instance.publication_info as instance_publication_info
 
-FROM
-	folio_notes.note__ as n
-	LEFT JOIN SOMETHING ON n.id = 
-    folio_inventory.instance__t
+FROM folio_inventory.item__ as i
+CROSS JOIN LATERAL jsonb_array_elements(jsonb_extract_path(i.jsonb, 'notes')) WITH ORDINALITY AS notes (data)
     LEFT JOIN folio_inventory.holdings__t ON instance__t.SOMETHING = holdings__t.SOMETHING
     LEFT JOIN folio_inventory.item__t ON holdings__t.SOMETHING = item__t.SOMETHING
 	
 	WHERE
-	folio_notes.note__
+	notes.content LIKE '%' + note_string + '%'
     itt.__current = true and
     itt.barcode = barcode_to_check and
     cit.item_status_prior_to_check_in = 'Checked out' and
