@@ -9,7 +9,7 @@ returns table(
 	item_barcode text,
 	item_shelving_location_code text,
 	item_shelving_location_name text,
-	call_number text,
+	item_call_number text,
 	instance_title text,
 	item_note text
 )
@@ -17,11 +17,11 @@ as $$
 	
 select distinct 
 	i.jsonb ->> 'barcode' as item_barcode, 
-	lt.code,
-	lt.name,
+	lt.code as item_shelving_location_code,
+	lt.name as item_shelving_location_name,
 	concat_ws(' ', i.jsonb -> 'effectiveCallNumberComponents'->>'prefix', i.jsonb -> 'effectiveCallNumberComponents'->>'callNumber', i.jsonb ->> 'copyNumber') as item_callnumber,
-	inst.title,
-	jsonb_extract_path_text(notes.data, 'note') as Note
+	inst.title as instance_title,
+	jsonb_extract_path_text(notes.data, 'note') as item_note
 from folio_inventory.item__ as i
 cross join lateral jsonb_array_elements(jsonb_extract_path(i.jsonb, 'notes')) with ordinality as notes (data)
 left join folio_inventory.item__t__ as it on i.id = it.id
