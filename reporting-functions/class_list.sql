@@ -30,7 +30,7 @@ left join folio_inventory.instance__t__ as inst on hrt.instance_id = inst.id
 left join folio_inventory.location__t__ as lt on hrt.effective_location_id = lt.id
 --left join folio_derived.instance_contributors as ic on inst.id = ic.instance_id    /* might add this line to include the author */
 
-where jsonb_extract_path_text(notes.data, 'note') like '%' + note_string + '%'
+where jsonb_extract_path_text(notes.data, 'note') like ('%' || note_string || '%')
 
 $$
 language sql
