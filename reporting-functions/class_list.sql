@@ -22,12 +22,12 @@ select distinct
 	concat_ws(' ', i.jsonb -> 'effectiveCallNumberComponents'->>'prefix', i.jsonb -> 'effectiveCallNumberComponents'->>'callNumber', i.jsonb ->> 'copyNumber') as item_callnumber,
 	inst.title as instance_title,
 	jsonb_extract_path_text(notes.data, 'note') as item_note
-from folio_inventory.item__ as i
+from folio_inventory.item as i
 cross join lateral jsonb_array_elements(jsonb_extract_path(i.jsonb, 'notes')) with ordinality as notes (data)
-left join folio_inventory.item__t__ as it on i.id = it.id
-left join folio_inventory.holdings_record__t__ as hrt on it.holdings_record_id = hrt.id
-left join folio_inventory.instance__t__ as inst on hrt.instance_id = inst.id
-left join folio_inventory.location__t__ as lt on hrt.effective_location_id = lt.id
+left join folio_inventory.item__t as it on i.id = it.id
+left join folio_inventory.holdings_record__t as hrt on it.holdings_record_id = hrt.id
+left join folio_inventory.instance__t as inst on hrt.instance_id = inst.id
+left join folio_inventory.location__t as lt on hrt.effective_location_id = lt.id
 --left join folio_derived.instance_contributors as ic on inst.id = ic.instance_id    /* might add this line to include the author */
 
 where jsonb_extract_path_text(notes.data, 'note') ~* note_string
