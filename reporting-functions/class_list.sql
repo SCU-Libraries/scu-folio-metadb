@@ -7,8 +7,8 @@ CREATE FUNCTION class_list(
 )
 returns table(
 	item_barcode text,
-	item_shelving_location_code text,
-	item_shelving_location_name text,
+	location_code text,
+	location_name text,
 	item_call_number text,
 	instance_title text,
 	item_note text
@@ -17,8 +17,8 @@ as $$
 	
 select distinct 
 	i.jsonb ->> 'barcode' as item_barcode, 
-	lt.code as item_shelving_location_code,
-	lt.name as item_shelving_location_name,
+	lt.code as location_code,
+	lt.name as location_name,
 	concat_ws(' ', i.jsonb -> 'effectiveCallNumberComponents'->>'prefix', i.jsonb -> 'effectiveCallNumberComponents'->>'callNumber', i.jsonb ->> 'copyNumber') as item_callnumber,
 	inst.title as instance_title,
 	jsonb_extract_path_text(notes.data, 'note') as item_note
