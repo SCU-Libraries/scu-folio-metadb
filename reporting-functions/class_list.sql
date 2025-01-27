@@ -6,7 +6,7 @@ CREATE FUNCTION class_list(
 	note_string text
 )
 returns table(
-	item_barcode,
+	item_barcode text,
 	item_shelving_location_code text,
 	item_shelving_location_name text,
 	call_number text,
