@@ -29,7 +29,7 @@ FROM
 	LEFT JOIN folio_derived.instance_ext inst on hrt.instance_id = inst.instance_id
 	LEFT JOIN folio_derived.locations_libraries locl on iext.effective_location_id = locl.location_id
 WHERE
-	inot.note ~ note_string
+	inot.note ~* note_string
 ORDER BY
 	location_name, call_number
 	
