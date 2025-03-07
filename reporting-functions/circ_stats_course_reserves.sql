@@ -10,7 +10,7 @@ CREATE FUNCTION circ_stats_course_reserves(
 returns table(
 	Course_Reserve_Item_Barcode text,
 	Course_Reserve_Item_Title text,
-	Course_Reserve_Circ_Count text
+	Course_Reserve_Circ_Count numeric
 )
 as $$
 SELECT iext.barcode as item_barcode, inst.title as instance_title, count(lit.loan_id)
