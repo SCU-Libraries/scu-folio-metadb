@@ -3,7 +3,7 @@
 DROP FUNCTION IF EXISTS circ_stats_course_reserves;
 	
 CREATE FUNCTION circ_stats_course_reserves(
-	course_name text,
+	Circ_Stat_Course_Name text,
 	start_date date DEFAULT '2000-01-01',
   	end_date date DEFAULT '2099-01-01'
 )
