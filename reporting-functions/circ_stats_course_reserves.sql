@@ -8,12 +8,12 @@ CREATE FUNCTION circ_stats_course_reserves(
   	end_date date DEFAULT '2099-01-01'
 )
 returns table(
-	Course_Reserve_Item_Barcode text,
-	Course_Reserve_Item_Title text,
-	Course_Reserve_Circ_Count numeric
+	item_barcode text,
+	instance_title text,
+	circ_count numeric
 )
 as $$
-SELECT iext.barcode as item_barcode, inst.title as instance_title, count(lit.loan_id)
+SELECT iext.barcode as item_barcode, inst.title as instance_title, count(lit.loan_id) as circ_count
 from
 	folio_courses.coursereserves_courses__t__ crct
 	left join folio_courses.coursereserves_reserves__t__ crrt on crct.course_listing_id = crrt.course_listing_id
