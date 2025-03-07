@@ -1,0 +1,19 @@
+SELECT
+	iext.barcode as item_barcode,
+/*	trim(concat(iext.effective_call_number_prefix, ' ', iext.effective_call_number, ' ', iext.effective_call_number, ' ', iext.volume, ' ', iext.copy_number)) as call_number, */
+	inst.title as instance_title,
+	count(lit.loan_id)
+from
+	folio_courses.coursereserves_courses__t__ crct
+	left join folio_courses.coursereserves_reserves__t__ crrt on crct.course_listing_id = crrt.course_listing_id
+	left join folio_derived.item_ext iext on crrt.item_id = iext.item_id
+	LEFT JOIN folio_derived.holdings_ext hrt on iext.holdings_record_id = hrt.holdings_id
+	LEFT JOIN folio_derived.instance_ext inst on hrt.instance_id = inst.instance_id
+	left join folio_derived.loans_items lit on crrt.item_id = lit.item_id 
+WHERE
+	crct.name ~ 'POP Black Joy' 
+	and '1994-02-01' <= lit.loan_date and lit.loan_date <= '2025-02-28' 
+group by
+	iext.barcode, inst.title, lit.loan_id
+ORDER BY
+	instance_title 
