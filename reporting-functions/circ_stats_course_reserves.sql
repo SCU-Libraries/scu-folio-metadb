@@ -22,7 +22,7 @@ from
 	LEFT JOIN folio_derived.instance_ext inst on hrt.instance_id = inst.instance_id
 	left join folio_derived.loans_items lit on crrt.item_id = lit.item_id 
 WHERE
-	crct.name ~ course_name 
+	crct.name ~ Circ_Stat_Course_Name 
 	and start_date <= lit.loan_date and lit.loan_date <= end_date 
 group by
 	iext.barcode, inst.title, lit.loan_id
