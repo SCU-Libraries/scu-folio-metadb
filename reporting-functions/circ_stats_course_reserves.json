@@ -1,0 +1,24 @@
+{
+    "displayName": "Display circulation stats for a given course reserve and date range",
+    "description": "Created by Lev for the POP Committee to analyze monthly display usage",
+    "instructions": "Enter the title for the course in question and specify the dates between which you want to review circulation counts.",
+    "parameters": [
+        {
+            "name": "Circ_Stat_Course_Name",
+            "displayName": "Course Name",
+            "type": "text",
+            "required": true
+        },
+        {
+            "name": "start_date",
+            "displayName": "Earliest date of circulation activity",
+            "type": "date",
+            "required": false
+        },
+        {
+            "name": "end_date",
+            "displayName": "Latest date of circulation activity",
+            "type": "date",
+            "required": false
+        }
+    ]
