@@ -1,0 +1,13 @@
+{
+    "displayName": "Display inventory for the Curriculum Collection",
+    "description": "Created by Lev to review inventory in the Curriculum Collection",
+    "instructions": "Enter the call number prefix 'Curr' to see everything in the Curriculum Collection",
+    "parameters": [
+        {
+            "name": "i_call_number_prefix",
+            "displayName": "Call Number Prefix",
+            "type": "text",
+            "required": true
+        }
+    ]
+}
