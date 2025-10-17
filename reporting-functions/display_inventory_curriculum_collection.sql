@@ -6,16 +6,16 @@ CREATE FUNCTION display_inventory_curriculum_collection(
 	i_call_number_prefix text
 )
 returns table(
-	o_location text,
-	o_index_title text,
-	o_contributor_name text,
-	o_call_number text,
-	o_volume text,
-	o_copy_number text,
-	o_link text,
-	o_item_barcode text,
-	o_item_id text,
-	o_holdings_id text
+	location text,
+	index_title text,
+	contributor_name text,
+	call_number text,
+	volume text,
+	copy_number text,
+	link text,
+	item_barcode text,
+	item_id text,
+	holdings_id text
 )
 as $$
 
