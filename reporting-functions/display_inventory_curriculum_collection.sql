@@ -40,7 +40,7 @@ FROM
 	left join folio_inventory.instance__t as int on hrt.instance_id = int.id
 	left join folio_derived.instance_contributors as ic on int.id = ic.instance_id
 where 
-	hrt.call_number_prefix = 'Curr'
+	hrt.call_number_prefix = i_call_number_prefix
 	and ic.contributor_is_primary = TRUE;
 
 $$
