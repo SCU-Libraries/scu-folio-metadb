@@ -1,3 +1,19 @@
+--metadb:function circ_stats_course_reserves
+
+DROP FUNCTION IF EXISTS circ_stats_course_reserves;
+	
+CREATE FUNCTION circ_stats_course_reserves(
+	Circ_Stat_Course_Name text,
+	start_date date DEFAULT '2000-01-01',
+  	end_date date DEFAULT '2099-01-01'
+)
+returns table(
+	item_barcode text,
+	instance_title text,
+	circ_count numeric
+)
+as $$
+
 SELECT distinct  
 	lt.name as "Location", 
 	int.index_title as "Title", 
