@@ -1,16 +1,21 @@
---metadb:function circ_stats_course_reserves
+--metadb:function display_inventory_curriculum_collection
 
-DROP FUNCTION IF EXISTS circ_stats_course_reserves;
+DROP FUNCTION IF EXISTS display_inventory_curriculum_collection;
 	
-CREATE FUNCTION circ_stats_course_reserves(
-	Circ_Stat_Course_Name text,
-	start_date date DEFAULT '2000-01-01',
-  	end_date date DEFAULT '2099-01-01'
+CREATE FUNCTION display_inventory_curriculum_collection(
+	call_number_prefix text
 )
 returns table(
+	location text,
+	index_title text,
+	contributor_name text,
+	call_number text,
+	volume text,
+	copy_number text,
+	link text,
 	item_barcode text,
-	instance_title text,
-	circ_count numeric
+	item_id text,
+	holdings_id text
 )
 as $$
 
@@ -37,3 +42,8 @@ FROM
 where 
 	hrt.call_number_prefix = 'Curr'
 	and ic.contributor_is_primary = TRUE;
+
+$$
+language sql
+STABLE 
+PARALLEL SAFE; 
