@@ -1,0 +1,19 @@
+{
+    "displayName": "Checkout counts for all books in course reserves",
+    "description": "Modified version of Lev's function Created by Michael for all course reserves.",
+    "instructions": "Enter date range. Preserves original ordering. For no date entered, counts all time.",
+    "parameters": [
+        {
+            "name": "start_date",
+            "displayName": "Earliest date of circulation activity",
+            "type": "date",
+            "required": false
+        },
+        {
+            "name": "end_date",
+            "displayName": "Latest date of circulation activity",
+            "type": "date",
+            "required": false
+        }
+    ]
+}
