@@ -13,9 +13,8 @@ returns table(
 )
 as $$
 select cit.id AS Check_In_ID, cit.occurred_date_time as Check_In_Date
-  from folio_circulation.check_in__t__ as cit JOIN folio_inventory.item__t__ as itt ON cit.item_id = itt.id
+  from folio_circulation.check_in__t as cit JOIN folio_inventory.item__t as itt ON cit.item_id = itt.id
   WHERE
-    itt.__current = true and
     itt.barcode = barcode_to_check and
     cit.item_status_prior_to_check_in = 'Checked out' and
     start_date <= cit.occurred_date_time and cit.occurred_date_time <= end_date
