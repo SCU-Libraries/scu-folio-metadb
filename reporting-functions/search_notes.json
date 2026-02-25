@@ -1,0 +1,13 @@
+{
+    "displayName": "Display instance list based on item note",
+    "description": "Display a selection of instances by searching item notes",
+    "instructions": "Enter a search string for item note",
+    "parameters": [
+        {
+            "name": "note_string",
+            "displayName": "Item Note Contains",
+            "type": "text",
+            "required": false
+        }
+    ]
+}
