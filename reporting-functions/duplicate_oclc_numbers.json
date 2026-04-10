@@ -1,0 +1,6 @@
+{
+    "displayName": "Report Duplicate OCLC Numbers",
+    "description": "Collates duplicate OCLC numbers, excluding known duplicates.",
+    "instructions": "Run report, update instances, re-run report.",
+    "parameters": []
+}
