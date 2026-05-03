@@ -69,8 +69,8 @@ LEFT JOIN folio_derived.holdings_ext hrt
 LEFT JOIN folio_derived.instance_ext inst
        ON hrt.instance_id = inst.instance_id
 LEFT JOIN folio_circulation.loan__t__ li
-       ON iext.item_id = li.item_id
-      AND (li.action = 'checkedout' OR li.action = 'renewed')
+       ON iext.item_id = li.item_id 
+      AND (li.action = 'checkedout') -- CHECKOUTS Based on Date Range of the quarter (right now is cumulative)
       AND (
           coalesce(trim($4), '') <> ''
           OR lower(coalesce(trim($7), '')) IN ('1', 'true', 't', 'yes', 'y', 'on')
@@ -81,7 +81,7 @@ WHERE
     AND (
         coalesce(trim($4), '') <> ''
         OR $3 IS NULL
-        OR $3 = ''
+        OR $3 = '' -- specifying couse term does not filter correctly with Term name + course code, shows all historical terms under that term name
         OR term_resolved.name IS NOT NULL
     )
     AND (
