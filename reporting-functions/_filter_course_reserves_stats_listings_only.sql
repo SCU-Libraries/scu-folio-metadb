@@ -2,6 +2,12 @@
 
 DROP FUNCTION IF EXISTS _filter_course_reserves_stats_listings_only;
 
+
+-- Split into quarter/date, and permanent reserves: 
+-- if quarter not null, then set start_date and end_date variables as the respective quarter's 
+-- otherwise, use user specified start and end date
+-- Make sure to only count 'checkout' actions that have a date within 
+-- 
 CREATE FUNCTION _filter_course_reserves_stats_listings_only(
     start_date date DEFAULT '0001-01-01',
     end_date   date DEFAULT '9999-12-31',
@@ -78,6 +84,7 @@ LEFT JOIN folio_circulation.loan__t__ li
       )
 WHERE
     reserves.item_id IS NOT NULL
+    AND reserves_start_date IS NULL
     AND (
         coalesce(trim($4), '') <> ''
         OR $3 IS NULL
