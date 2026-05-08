@@ -84,7 +84,7 @@ LEFT JOIN folio_circulation.loan__t__ li
       )
 WHERE
     reserves.item_id IS NOT NULL
-    AND reserves_start_date IS NULL
+    AND reserves.start_date IS NULL
     AND (
         coalesce(trim($4), '') <> ''
         OR $3 IS NULL
