@@ -1,24 +1,8 @@
--- =============================================================================
--- COURSE RESERVES REPORT FUNCTIONS
--- =============================================================================
--- Permanent = reserves.end_date IS NULL
--- Historical (quarter course report) = all past reserve instances for a
---   course+item, each row scoped to its own term's checkout date range.
--- Term resolution: term_name takes priority over explicit start_date/end_date.
---   If term_name is provided, dates are resolved from coursereserves_terms__t__.
--- Exclusions apply to all reports.
--- =============================================================================
+--metadb:function _reserves_permanent_course
 
--- =============================================================================
--- 4. SINGLE PERMANENT COURSE REPORT
---    One or more specific permanent courses (end_date IS NULL).
---    Historical toggle: when ON, includes non-current reserves.
---    Date filters apply to checkout counts only.
--- =============================================================================
+DROP FUNCTION IF EXISTS _reserves_permanent_course;
 
-DROP FUNCTION IF EXISTS course_reserves_permanent_course_report;
-
-CREATE FUNCTION course_reserves_permanent_course_report(
+CREATE FUNCTION _reserves_permanent_course(
     course_codes    text DEFAULT NULL,  -- comma-separated, e.g. 'CS 101,HIST 200'
     start_date      date DEFAULT '0001-01-01',
     end_date        date DEFAULT '9999-12-31',
