@@ -27,7 +27,8 @@ RETURNS TABLE(
     is_current integer,
     course_listing_id text,
     item_id text,
-    reserves_start_date date
+    reserves_start_date date,
+    reserves_end_date date
 )
 AS $$
 SELECT
@@ -40,7 +41,8 @@ SELECT
     CASE WHEN reserves.__current THEN 1 ELSE 0 END AS is_current,
     courses.course_listing_id,
     reserves.item_id,
-    reserves.start_date AS reserves_start_date
+    reserves.start_date AS reserves_start_date,
+    reserves.end_date AS reserves_end_date
 FROM
     folio_courses.coursereserves_courses__t__ courses
 INNER JOIN folio_courses.coursereserves_reserves__t__ reserves

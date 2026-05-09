@@ -1,0 +1,30 @@
+{
+    "displayName": "Course Reserves — Quarter Report",
+    "description": "Checkout counts for all courses with active reserves, scoped to a single quarter. Provide either a term name (resolved to dates automatically) or explicit start/end dates. No course filter; no historical toggle — always shows current reserves only.",
+    "parameters": [
+        {
+            "name": "term_name",
+            "displayName": "Term name (exact match, e.g. Spring 2025) — takes priority over date range if provided",
+            "type": "text",
+            "required": false
+        },
+        {
+            "name": "start_date",
+            "displayName": "Quarter start date (used only if Term Name is blank)",
+            "type": "date",
+            "required": false
+        },
+        {
+            "name": "end_date",
+            "displayName": "Quarter end date (used only if Term Name is blank)",
+            "type": "date",
+            "required": false
+        },
+        {
+            "name": "exclusions",
+            "displayName": "Exclude course types — comma-separated flags [POP, LAW, NEW, EMPTY]",
+            "type": "text",
+            "required": false
+        }
+    ]
+}
