@@ -6,7 +6,9 @@ CREATE FUNCTION _reserves_quarter(
     term_name  text DEFAULT NULL,
     start_date date DEFAULT '0001-01-01',
     end_date   date DEFAULT '9999-12-31',
-    exclusions text DEFAULT NULL
+    exclusions text DEFAULT NULL,
+    show_historical_reserves text DEFAULT NULL,
+    show_historical_checkouts text DEFAULT NULL
 )
 RETURNS TABLE(
     course_term        text,
@@ -20,9 +22,6 @@ RETURNS TABLE(
 )
 AS $$
 WITH
-    -- Resolve the effective date window.
-    -- If term_name is provided, look up that term's start/end dates.
-    -- Otherwise fall through to the caller-supplied start_date/end_date.
     resolved_window AS (
         SELECT
             CASE
@@ -55,7 +54,6 @@ FROM
     folio_courses.coursereserves_courses__t__ courses
 INNER JOIN folio_courses.coursereserves_reserves__t__ reserves
         ON courses.course_listing_id = reserves.course_listing_id
--- Resolve the display term name for this course listing (same lateral as original).
 LEFT JOIN LATERAL (
         SELECT t.name
         FROM folio_courses.coursereserves_courses__t__ c_same
@@ -68,7 +66,6 @@ LEFT JOIN LATERAL (
               l_same.id = courses.course_listing_id
               OR c_same.course_listing_id <> courses.course_listing_id
           )
-          -- When term_name is set, only consider listings under that term.
           AND (
               term_name IS NULL OR term_name = ''
               OR t.name = term_name
@@ -84,22 +81,27 @@ LEFT JOIN folio_derived.holdings_ext hrt
        ON iext.holdings_record_id = hrt.holdings_id
 LEFT JOIN folio_derived.instance_ext inst
        ON hrt.instance_id = inst.instance_id
--- Only count checkouts that fall within the resolved quarter window.
 LEFT JOIN folio_circulation.loan__t__ li
        ON iext.item_id = li.item_id
       AND li.action = 'checkedout'
       AND li.loan_date BETWEEN (SELECT win_start FROM resolved_window)
                            AND (SELECT win_end   FROM resolved_window)
+      -- Only count checkouts for non-current reserves when show_historical_checkouts is enabled
+      AND (
+          lower(coalesce(trim(show_historical_checkouts), '')) IN ('1', 'true', 't', 'yes', 'y', 'on')
+          OR reserves.__current = true
+      )
 WHERE
     reserves.item_id IS NOT NULL
-    -- Current reserves only; no historical toggle on this report.
-    AND reserves.__current = true
-    -- term_resolved must match when term_name is provided.
+    -- Include historical reserves when show_historical_reserves is enabled
+    AND (
+        lower(coalesce(trim(show_historical_reserves), '')) IN ('1', 'true', 't', 'yes', 'y', 'on')
+        OR reserves.__current = true
+    )
     AND (
         term_name IS NULL OR term_name = ''
         OR term_resolved.name IS NOT NULL
     )
-    -- Exclusions: remove specific course numbers when flag is present.
     AND (
         exclusions IS NULL OR (
             (exclusions NOT ILIKE '%POP%'   OR courses.course_number IS DISTINCT FROM 'POP') AND

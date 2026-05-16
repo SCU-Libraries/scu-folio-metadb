@@ -69,8 +69,8 @@ LEFT JOIN folio_circulation.loan__t__ li
       AND li.loan_date BETWEEN start_date AND end_date
 WHERE
     reserves.item_id IS NOT NULL
-    -- Permanent reserves only: no end date.
-    AND reserves.end_date IS NULL
+    -- Permanent reserves only
+    AND term_resolved.name = 'Permanent'
     -- Historical toggle: when OFF, only current reserves.
     AND (
         lower(coalesce(trim(show_historical), '')) IN ('1','true','t','yes','y','on')
