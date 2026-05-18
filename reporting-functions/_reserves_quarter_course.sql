@@ -3,31 +3,28 @@
 DROP FUNCTION IF EXISTS _reserves_quarter_course;
 
 CREATE FUNCTION _reserves_quarter_course(
-    course_codes      text DEFAULT NULL,  -- comma-separated, e.g. 'CS 101,HIST 200'
-    term_name         text DEFAULT NULL,
-    start_date        date DEFAULT '0001-01-01',
-    end_date          date DEFAULT '9999-12-31',
-    exclusions        text DEFAULT NULL,
-    show_historical   text DEFAULT NULL   -- '1','true','t','yes','y','on' = show all past instances
+    course_codes    text DEFAULT NULL,  -- comma-separated, e.g. 'CS 101,HIST 200'
+    term_name       text DEFAULT NULL,
+    start_date      date DEFAULT '0001-01-01',
+    end_date        date DEFAULT '9999-12-31',
+    exclusions      text DEFAULT NULL,
+    show_historical text DEFAULT NULL   -- '1','true','t','yes','y','on' = show all past instances
 )
 RETURNS TABLE(
-    course_term        text,
-    course_number      text,
-    item_barcode       text,
-    call_number        text,
-    instance_title     text,
-    checkout_count     bigint,
-    is_current         integer,
-    course_listing_id  text,
-    item_id            text,
+    course_term         text,
+    course_number       text,
+    item_barcode        text,
+    call_number         text,
+    instance_title      text,
+    checkout_count      bigint,
+    is_current          integer,
+    course_listing_id   text,
+    item_id             text,
     reserves_start_date date,
     reserves_end_date   date
 )
 AS $$
 WITH
-    -- Resolve the caller's quarter window for anchoring the course lookup.
-    -- When show_historical is ON, each reserve instance uses its own term's
-    -- dates (resolved per-row in the main query via the term lateral).
     resolved_window AS (
         SELECT
             CASE
@@ -48,24 +45,21 @@ WITH
         LIMIT 1
     )
 SELECT
-    term_resolved.name        AS course_term,
+    term_resolved.name         AS course_term,
     courses.course_number,
-    iext.barcode              AS item_barcode,
+    iext.barcode               AS item_barcode,
     iext.effective_call_number AS call_number,
-    inst.title                AS instance_title,
-    COUNT(li.__id)            AS checkout_count,
+    inst.title                 AS instance_title,
+    COUNT(li.__id)             AS checkout_count,
     CASE WHEN reserves.__current THEN 1 ELSE 0 END AS is_current,
     courses.course_listing_id,
     reserves.item_id,
-    reserves.start_date       AS reserves_start_date,
-    reserves.end_date         AS reserves_end_date
+    reserves.start_date        AS reserves_start_date,
+    reserves.end_date          AS reserves_end_date
 FROM
     folio_courses.coursereserves_courses__t__ courses
 INNER JOIN folio_courses.coursereserves_reserves__t__ reserves
         ON courses.course_listing_id = reserves.course_listing_id
--- Resolve the display term name AND that term's date window per reserve instance.
--- For historical rows, this lateral returns the term belonging to each listing,
--- which is then used to scope that row's checkout count.
 LEFT JOIN LATERAL (
         SELECT t.name, t.start_date AS term_start, t.end_date AS term_end
         FROM folio_courses.coursereserves_courses__t__ c_same
@@ -78,14 +72,18 @@ LEFT JOIN LATERAL (
               l_same.id = courses.course_listing_id
               OR c_same.course_listing_id <> courses.course_listing_id
           )
-          -- When not showing historical, restrict lateral to the caller's term.
+          -- When not showing historical, restrict to the caller's term OR Permanent,
+          -- since permanent reserves are active across all quarters.
           AND (
               lower(coalesce(trim(show_historical), '')) IN ('1','true','t','yes','y','on')
               OR term_name IS NULL OR term_name = ''
               OR t.name = term_name
+              OR t.name = 'Permanent'
           )
         ORDER BY
             CASE WHEN l_same.id = courses.course_listing_id THEN 0 ELSE 1 END,
+            -- Prefer the matching term over Permanent when both exist
+            CASE WHEN t.name = term_name THEN 0 ELSE 1 END,
             t.start_date DESC
         LIMIT 1
 ) term_resolved ON true
@@ -95,9 +93,6 @@ LEFT JOIN folio_derived.holdings_ext hrt
        ON iext.holdings_record_id = hrt.holdings_id
 LEFT JOIN folio_derived.instance_ext inst
        ON hrt.instance_id = inst.instance_id
--- Checkout counts are scoped to each reserve instance's own term date window.
--- For current (non-historical) rows this is the caller's resolved quarter.
--- For historical rows this is that instance's resolved term dates.
 LEFT JOIN folio_circulation.loan__t__ li
        ON iext.item_id = li.item_id
       AND li.action = 'checkedout'
@@ -106,18 +101,18 @@ LEFT JOIN folio_circulation.loan__t__ li
           AND coalesce(term_resolved.term_end,   (SELECT win_end   FROM resolved_window))
 WHERE
     reserves.item_id IS NOT NULL
-    -- Historical toggle: when OFF, only current reserves.
+    -- Historical toggle: when OFF, only current reserves
     AND (
         lower(coalesce(trim(show_historical), '')) IN ('1','true','t','yes','y','on')
         OR reserves.__current = true
     )
     -- term_resolved must resolve when term_name is provided.
+    -- Permanent-term courses pass this because the lateral now includes them.
     AND (
         term_name IS NULL OR term_name = ''
         OR term_resolved.name IS NOT NULL
     )
-    -- Filter to the specified course code(s).
-    -- Normalizes spacing between letters and digits (e.g. 'CS101' → 'CS 101').
+    -- Filter to the specified course code(s)
     AND (
         course_codes IS NULL OR course_codes = ''
         OR regexp_replace(upper(trim(courses.course_number)), '([A-Z])(\d)', '\1 \2', 'g') = ANY(
@@ -130,7 +125,7 @@ WHERE
             )
         )
     )
-    -- Exclusions.
+    -- Exclusions
     AND (
         exclusions IS NULL OR (
             (exclusions NOT ILIKE '%POP%'   OR courses.course_number IS DISTINCT FROM 'POP') AND

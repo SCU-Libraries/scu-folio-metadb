@@ -3,12 +3,11 @@
 DROP FUNCTION IF EXISTS _reserves_quarter;
 
 CREATE FUNCTION _reserves_quarter(
-    term_name  text DEFAULT NULL,
-    start_date date DEFAULT '0001-01-01',
-    end_date   date DEFAULT '9999-12-31',
-    exclusions text DEFAULT NULL,
-    show_historical_reserves text DEFAULT NULL,
-    show_historical_checkouts text DEFAULT NULL
+    term_name       text DEFAULT NULL,
+    start_date      date DEFAULT '0001-01-01',
+    end_date        date DEFAULT '9999-12-31',
+    exclusions      text DEFAULT NULL,
+    show_historical text DEFAULT NULL   -- '1','true','t','yes','y','on' = include non-current reserves
 )
 RETURNS TABLE(
     course_term        text,
@@ -42,12 +41,12 @@ WITH
         LIMIT 1
     )
 SELECT
-    term_resolved.name   AS course_term,
+    term_resolved.name         AS course_term,
     courses.course_number,
-    iext.barcode         AS item_barcode,
+    iext.barcode               AS item_barcode,
     iext.effective_call_number AS call_number,
-    inst.title           AS instance_title,
-    COUNT(li.__id)       AS checkout_count,
+    inst.title                 AS instance_title,
+    COUNT(li.__id)             AS checkout_count,
     courses.course_listing_id,
     reserves.item_id
 FROM
@@ -66,12 +65,17 @@ LEFT JOIN LATERAL (
               l_same.id = courses.course_listing_id
               OR c_same.course_listing_id <> courses.course_listing_id
           )
+          -- When term_name is set, match that term OR include Permanent-term courses,
+          -- since permanent reserves are active across all quarters.
           AND (
               term_name IS NULL OR term_name = ''
               OR t.name = term_name
+              OR t.name = 'Permanent'
           )
         ORDER BY
             CASE WHEN l_same.id = courses.course_listing_id THEN 0 ELSE 1 END,
+            -- Prefer the matching term over Permanent when both exist
+            CASE WHEN t.name = term_name THEN 0 ELSE 1 END,
             t.start_date DESC
         LIMIT 1
 ) term_resolved ON true
@@ -86,22 +90,21 @@ LEFT JOIN folio_circulation.loan__t__ li
       AND li.action = 'checkedout'
       AND li.loan_date BETWEEN (SELECT win_start FROM resolved_window)
                            AND (SELECT win_end   FROM resolved_window)
-      -- Only count checkouts for non-current reserves when show_historical_checkouts is enabled
-      AND (
-          lower(coalesce(trim(show_historical_checkouts), '')) IN ('1', 'true', 't', 'yes', 'y', 'on')
-          OR reserves.__current = true
-      )
 WHERE
     reserves.item_id IS NOT NULL
-    -- Include historical reserves when show_historical_reserves is enabled
+    -- Historical toggle: when OFF (default), only current reserves.
+    -- When no term_name is given, default is also current-only unless toggled.
     AND (
-        lower(coalesce(trim(show_historical_reserves), '')) IN ('1', 'true', 't', 'yes', 'y', 'on')
+        lower(coalesce(trim(show_historical), '')) IN ('1','true','t','yes','y','on')
         OR reserves.__current = true
     )
+    -- term_resolved must resolve when term_name is provided.
+    -- Permanent-term courses pass this check because the lateral now includes them.
     AND (
         term_name IS NULL OR term_name = ''
         OR term_resolved.name IS NOT NULL
     )
+    -- Exclusions
     AND (
         exclusions IS NULL OR (
             (exclusions NOT ILIKE '%POP%'   OR courses.course_number IS DISTINCT FROM 'POP') AND

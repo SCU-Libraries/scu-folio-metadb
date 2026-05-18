@@ -1,6 +1,6 @@
 {
     "displayName": "Course Reserves — Single Quarter Course Report",
-    "description": "Checkout counts for one or more specific courses, scoped to a quarter. Provide either a term name or explicit start/end dates. With historical OFF: shows only current reserves, checkouts scoped to the specified quarter. With historical ON: shows all past reserve instances for the course+item, each row's checkout count scoped to that instance's own term date range.",
+    "description": "Checkout counts for one or more specific courses, scoped to a quarter. Provide either a term name or explicit start/end dates. Courses assigned to the 'Permanent' term in FOLIO are included when filtering by quarter — their checkout counts are scoped to the specified quarter's date window. With historical OFF (default): shows only current reserves. With historical ON: shows all past reserve instances for the course+item, each row's checkout count scoped to that instance's own term date range.",
     "parameters": [
         {
             "name": "course_codes",

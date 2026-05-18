@@ -6,39 +6,39 @@ CREATE FUNCTION _reserves_permanent(
     start_date      date DEFAULT '0001-01-01',
     end_date        date DEFAULT '9999-12-31',
     exclusions      text DEFAULT NULL,
-    show_historical text DEFAULT NULL   -- '1','true','t','yes','y','on' = include non-current
+    show_historical text DEFAULT NULL,  -- '1','true','t','yes','y','on' = include non-current
+    course_codes    text DEFAULT NULL   -- optional comma-separated filter, e.g. 'CS 101,HIST 200'
 )
 RETURNS TABLE(
-    course_term        text,
-    course_number      text,
-    item_barcode       text,
-    call_number        text,
-    instance_title     text,
-    checkout_count     bigint,
-    is_current         integer,
-    course_listing_id  text,
-    item_id            text,
+    course_term         text,
+    course_number       text,
+    item_barcode        text,
+    call_number         text,
+    instance_title      text,
+    checkout_count      bigint,
+    is_current          integer,
+    course_listing_id   text,
+    item_id             text,
     reserves_start_date date,
     reserves_end_date   date
 )
 AS $$
 SELECT
-    term_resolved.name        AS course_term,
+    term_resolved.name         AS course_term,
     courses.course_number,
-    iext.barcode              AS item_barcode,
+    iext.barcode               AS item_barcode,
     iext.effective_call_number AS call_number,
-    inst.title                AS instance_title,
-    COUNT(li.__id)            AS checkout_count,
+    inst.title                 AS instance_title,
+    COUNT(li.__id)             AS checkout_count,
     CASE WHEN reserves.__current THEN 1 ELSE 0 END AS is_current,
     courses.course_listing_id,
     reserves.item_id,
-    reserves.start_date       AS reserves_start_date,
-    reserves.end_date         AS reserves_end_date
+    reserves.start_date        AS reserves_start_date,
+    reserves.end_date          AS reserves_end_date
 FROM
     folio_courses.coursereserves_courses__t__ courses
 INNER JOIN folio_courses.coursereserves_reserves__t__ reserves
         ON courses.course_listing_id = reserves.course_listing_id
--- Resolve display term name (no term_name filter; this report is not quarter-scoped).
 LEFT JOIN LATERAL (
         SELECT t.name
         FROM folio_courses.coursereserves_courses__t__ c_same
@@ -62,7 +62,6 @@ LEFT JOIN folio_derived.holdings_ext hrt
        ON iext.holdings_record_id = hrt.holdings_id
 LEFT JOIN folio_derived.instance_ext inst
        ON hrt.instance_id = inst.instance_id
--- Checkout counts scoped to caller's date range.
 LEFT JOIN folio_circulation.loan__t__ li
        ON iext.item_id = li.item_id
       AND li.action = 'checkedout'
@@ -71,12 +70,25 @@ WHERE
     reserves.item_id IS NOT NULL
     -- Permanent reserves only
     AND term_resolved.name = 'Permanent'
-    -- Historical toggle: when OFF, only current reserves.
+    -- Historical toggle: when OFF, only current reserves
     AND (
         lower(coalesce(trim(show_historical), '')) IN ('1','true','t','yes','y','on')
         OR reserves.__current = true
     )
-    -- Exclusions.
+    -- Optional course code filter
+    AND (
+        course_codes IS NULL OR course_codes = ''
+        OR regexp_replace(upper(trim(courses.course_number)), '([A-Z])(\d)', '\1 \2', 'g') = ANY(
+            string_to_array(
+                regexp_replace(
+                    regexp_replace(upper(trim(course_codes)), '([A-Z])(\d)', '\1 \2', 'g'),
+                    '\s*,\s*', ',', 'g'
+                ),
+                ','
+            )
+        )
+    )
+    -- Exclusions
     AND (
         exclusions IS NULL OR (
             (exclusions NOT ILIKE '%POP%'   OR courses.course_number IS DISTINCT FROM 'POP') AND
