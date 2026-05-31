@@ -17,7 +17,9 @@ RETURNS TABLE(
     instance_title     text,
     checkout_count     bigint,
     course_listing_id  text,
-    item_id            text
+    item_id            text,
+    win_start          date,
+    win_end            date
 )
 AS $$
 WITH
@@ -48,7 +50,9 @@ SELECT
     inst.title                 AS instance_title,
     COUNT(li.__id)             AS checkout_count,
     courses.course_listing_id,
-    reserves.item_id
+    reserves.item_id,
+    (SELECT win_start FROM resolved_window) AS win_start,
+    (SELECT win_end   FROM resolved_window) AS win_end
 FROM
     folio_courses.coursereserves_courses__t__ courses
 INNER JOIN folio_courses.coursereserves_reserves__t__ reserves
@@ -120,7 +124,9 @@ GROUP BY
     iext.barcode,
     iext.effective_call_number,
     inst.title,
-    term_resolved.name
+    term_resolved.name,
+    win_start,
+    win_end
 ORDER BY
     course_term
 $$
