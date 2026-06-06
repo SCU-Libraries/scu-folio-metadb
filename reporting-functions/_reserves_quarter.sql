@@ -42,6 +42,14 @@ WITH
               AND trim(term_name) <> ''
               AND t.name = term_name
         LIMIT 1
+    ),
+    ci_counts AS (
+        SELECT ci.item_id, COUNT(DISTINCT ci.id) AS checkout_count
+        FROM folio_circulation.check_in__t__ ci
+        WHERE ci.item_status_prior_to_check_in = 'Checked out'
+          AND ci.occurred_date_time BETWEEN (SELECT win_start FROM resolved_window)
+                                        AND (SELECT win_end   FROM resolved_window)
+        GROUP BY ci.item_id
     )
 SELECT
     CASE
@@ -53,7 +61,7 @@ SELECT
     iext.barcode                   AS item_barcode,
     iext.effective_call_number     AS call_number,
     inst.title                     AS instance_title,
-    COUNT(ci.id)                   AS checkout_count,
+    COALESCE(ci_counts.checkout_count, 0) AS checkout_count,
     courses.course_listing_id,
     reserves.item_id,
     (SELECT win_start FROM resolved_window) AS win_start,
@@ -91,12 +99,8 @@ LEFT JOIN folio_derived.holdings_ext hrt
        ON iext.holdings_record_id = hrt.holdings_id
 LEFT JOIN folio_derived.instance_ext inst
        ON hrt.instance_id = inst.instance_id
--- Replaced loan__t__ with check_in__t__ to count completed checkouts per term window
-LEFT JOIN folio_circulation.check_in__t__ ci
-       ON iext.item_id = ci.item_id
-      AND ci.item_status_prior_to_check_in = 'Checked out'
-      AND ci.occurred_date_time BETWEEN (SELECT win_start FROM resolved_window)
-                                    AND (SELECT win_end   FROM resolved_window)
+LEFT JOIN ci_counts
+       ON iext.item_id = ci_counts.item_id
 WHERE
     reserves.item_id IS NOT NULL
     AND (
@@ -129,6 +133,7 @@ GROUP BY
     iext.effective_call_number,
     inst.title,
     term_resolved.name,
+    ci_counts.checkout_count,
     win_start,
     win_end
 ORDER BY
