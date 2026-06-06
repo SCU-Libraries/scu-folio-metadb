@@ -7,7 +7,8 @@ CREATE FUNCTION _reserves_quarter(
     start_date      date DEFAULT '0001-01-01',
     end_date        date DEFAULT '9999-12-31',
     exclusions      text DEFAULT NULL,
-    show_historical text DEFAULT NULL   -- '1','true','t','yes','y','on' = include non-current reserves
+    show_historical text DEFAULT NULL,  -- '1','true','t','yes','y','on' = include non-current reserves
+    course_number   text DEFAULT NULL   -- exact match filter on course number
 )
 RETURNS TABLE(
     course_term        text,
@@ -28,12 +29,12 @@ WITH
             CASE
                 WHEN trim(term_name) IS NOT NULL AND trim(term_name) <> ''
                 THEN t.start_date
-                ELSE start_date
+                ELSE $2  -- start_date parameter (positional to avoid column name collision)
             END AS win_start,
             CASE
                 WHEN trim(term_name) IS NOT NULL AND trim(term_name) <> ''
                 THEN t.end_date
-                ELSE end_date
+                ELSE $3  -- end_date parameter (positional to avoid column name collision)
             END AS win_end
         FROM (SELECT 1) dummy
         LEFT JOIN folio_courses.coursereserves_terms__t__ t
@@ -43,12 +44,16 @@ WITH
         LIMIT 1
     )
 SELECT
-    term_resolved.name         AS course_term,
+    CASE
+        WHEN term_resolved.name = 'Permanent' AND trim(term_name) IS NOT NULL AND trim(term_name) <> ''
+        THEN term_name || ', Permanent'
+        ELSE term_resolved.name
+    END                            AS course_term,
     courses.course_number,
-    iext.barcode               AS item_barcode,
-    iext.effective_call_number AS call_number,
-    inst.title                 AS instance_title,
-    COUNT(li.__id)             AS checkout_count,
+    iext.barcode                   AS item_barcode,
+    iext.effective_call_number     AS call_number,
+    inst.title                     AS instance_title,
+    COUNT(li.__id)                 AS checkout_count,
     courses.course_listing_id,
     reserves.item_id,
     (SELECT win_start FROM resolved_window) AS win_start,
@@ -69,8 +74,6 @@ LEFT JOIN LATERAL (
               l_same.id = courses.course_listing_id
               OR c_same.course_listing_id <> courses.course_listing_id
           )
-          -- When term_name is set, match that term OR include Permanent-term courses,
-          -- since permanent reserves are active across all quarters.
           AND (
               term_name IS NULL OR term_name = ''
               OR t.name = term_name
@@ -78,7 +81,6 @@ LEFT JOIN LATERAL (
           )
         ORDER BY
             CASE WHEN l_same.id = courses.course_listing_id THEN 0 ELSE 1 END,
-            -- Prefer the matching term over Permanent when both exist
             CASE WHEN t.name = term_name THEN 0 ELSE 1 END,
             t.start_date DESC
         LIMIT 1
@@ -96,17 +98,19 @@ LEFT JOIN folio_circulation.loan__t__ li
                            AND (SELECT win_end   FROM resolved_window)
 WHERE
     reserves.item_id IS NOT NULL
-    -- Historical toggle: when OFF (default), only current reserves.
-    -- When no term_name is given, default is also current-only unless toggled.
     AND (
         lower(coalesce(trim(show_historical), '')) IN ('1','true','t','yes','y','on')
         OR reserves.__current = true
     )
-    -- term_resolved must resolve when term_name is provided.
-    -- Permanent-term courses pass this check because the lateral now includes them.
     AND (
         term_name IS NULL OR term_name = ''
         OR term_resolved.name IS NOT NULL
+    )
+    -- Course number filter
+    -- Course number filter
+    AND (
+        course_number IS NULL OR trim(course_number) = ''
+        OR courses.course_number ILIKE course_number || '%'
     )
     -- Exclusions
     AND (
