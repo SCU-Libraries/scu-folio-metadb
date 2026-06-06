@@ -8,7 +8,7 @@ CREATE FUNCTION _reserves_quarter(
     end_date        date DEFAULT '9999-12-31',
     exclusions      text DEFAULT NULL,
     show_historical text DEFAULT NULL,  -- '1','true','t','yes','y','on' = include non-current reserves
-    course_number   text DEFAULT NULL   -- exact match filter on course number
+    course_number   text DEFAULT NULL
 )
 RETURNS TABLE(
     course_term        text,
@@ -29,12 +29,12 @@ WITH
             CASE
                 WHEN trim(term_name) IS NOT NULL AND trim(term_name) <> ''
                 THEN t.start_date
-                ELSE $2  -- start_date parameter (positional to avoid column name collision)
+                ELSE $2
             END AS win_start,
             CASE
                 WHEN trim(term_name) IS NOT NULL AND trim(term_name) <> ''
                 THEN t.end_date
-                ELSE $3  -- end_date parameter (positional to avoid column name collision)
+                ELSE $3
             END AS win_end
         FROM (SELECT 1) dummy
         LEFT JOIN folio_courses.coursereserves_terms__t__ t
@@ -53,7 +53,7 @@ SELECT
     iext.barcode                   AS item_barcode,
     iext.effective_call_number     AS call_number,
     inst.title                     AS instance_title,
-    COUNT(li.__id)                 AS checkout_count,
+    COUNT(ci.id)                   AS checkout_count,
     courses.course_listing_id,
     reserves.item_id,
     (SELECT win_start FROM resolved_window) AS win_start,
@@ -91,11 +91,12 @@ LEFT JOIN folio_derived.holdings_ext hrt
        ON iext.holdings_record_id = hrt.holdings_id
 LEFT JOIN folio_derived.instance_ext inst
        ON hrt.instance_id = inst.instance_id
-LEFT JOIN folio_circulation.loan__t__ li
-       ON iext.item_id = li.item_id
-      AND li.action = 'checkedout'
-      AND li.loan_date BETWEEN (SELECT win_start FROM resolved_window)
-                           AND (SELECT win_end   FROM resolved_window)
+-- Replaced loan__t__ with check_in__t__ to count completed checkouts per term window
+LEFT JOIN folio_circulation.check_in__t__ ci
+       ON iext.item_id = ci.item_id
+      AND ci.item_status_prior_to_check_in = 'Checked out'
+      AND ci.occurred_date_time BETWEEN (SELECT win_start FROM resolved_window)
+                                    AND (SELECT win_end   FROM resolved_window)
 WHERE
     reserves.item_id IS NOT NULL
     AND (
