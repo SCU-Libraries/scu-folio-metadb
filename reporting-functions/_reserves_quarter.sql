@@ -107,10 +107,9 @@ WHERE
         OR term_resolved.name IS NOT NULL
     )
     -- Course number filter
-    -- Course number filter
     AND (
-        course_number IS NULL OR trim(course_number) = ''
-        OR courses.course_number ILIKE course_number || '%'
+        $6 IS NULL OR trim($6) = ''
+        OR courses.course_number ILIKE $6 || '%'
     )
     -- Exclusions
     AND (
