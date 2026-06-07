@@ -139,6 +139,8 @@ WHERE
             (exclusions NOT ILIKE '%POP%'   OR courses.course_number IS DISTINCT FROM 'POP') AND
             (exclusions NOT ILIKE '%LAW%'   OR courses.course_number NOT ILIKE 'LAW%') AND
             (exclusions NOT ILIKE '%NEW%'   OR courses.course_number IS DISTINCT FROM 'NEW') AND
+            (exclusions NOT ILIKE '%FLASH%' OR courses.course_number IS DISTINCT FROM 'FLASH') AND 
+            (exclusions NOT ILIKE '%PRE-LAW%' OR courses.course_number IS DISTINCT FROM 'PRE-LAW') AND 
             (exclusions NOT ILIKE '%EMPTY%' OR (courses.course_number IS NOT NULL AND courses.course_number <> ''))
         )
     )
