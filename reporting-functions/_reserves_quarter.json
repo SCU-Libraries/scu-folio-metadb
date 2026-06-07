@@ -4,7 +4,7 @@
     "parameters": [
         {
             "name": "term_name",
-            "displayName": "Term name (exact match, e.g. Spring 2025) — takes priority over date range if provided",
+            "displayName": "Term name (exact match, e.g. 2025 Spring Quarter) — takes priority over date range if provided",
             "type": "text",
             "required": false
         },
