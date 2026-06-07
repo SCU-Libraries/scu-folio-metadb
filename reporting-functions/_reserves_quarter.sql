@@ -3,12 +3,13 @@
 DROP FUNCTION IF EXISTS _reserves_quarter;
 
 CREATE FUNCTION _reserves_quarter(
-    term_name       text DEFAULT NULL,
-    start_date      date DEFAULT '0001-01-01',
-    end_date        date DEFAULT '9999-12-31',
-    exclusions      text DEFAULT NULL,
-    show_historical text DEFAULT NULL,  -- '1','true','t','yes','y','on' = include non-current reserves
-    course_number   text DEFAULT NULL
+    term_name           text DEFAULT NULL,
+    start_date          date DEFAULT '0001-01-01',
+    end_date            date DEFAULT '9999-12-31',
+    exclusions          text DEFAULT NULL,
+    show_historical     text DEFAULT NULL,  -- '1','true','t','yes','y','on' = include non-current reserves
+    course_number       text DEFAULT NULL,
+    exclude_permanent   text DEFAULT NULL   -- '1','true','t','yes','y','on' = exclude Permanent-term courses
 )
 RETURNS TABLE(
     course_term        text,
@@ -17,8 +18,6 @@ RETURNS TABLE(
     call_number        text,
     instance_title     text,
     checkout_count     bigint,
-    -- course_listing_id  text,
-    -- item_id            text,
     win_start          date,
     win_end            date
 )
@@ -94,7 +93,6 @@ LEFT JOIN LATERAL (
                 ON l_same.term_id = t.id
         WHERE c_same.course_number = courses.course_number
           AND (
-              -- Own listing, OR a Permanent listing for the same course
               l_same.id = courses.course_listing_id
               OR t.name = 'Permanent'
           )
@@ -128,12 +126,17 @@ WHERE
         term_name IS NULL OR term_name = ''
         OR term_resolved.name IS NOT NULL
     )
+    -- Exclude Permanent-term courses when toggled on
+    AND (
+        lower(coalesce(trim(exclude_permanent), '')) NOT IN ('1','true','t','yes','y','on')
+        OR term_resolved.name <> 'Permanent'
+    )
     -- Course number filter
     AND (
         $6 IS NULL OR trim($6) = ''
         OR courses.course_number ILIKE $6 || '%'
     )
-    -- Exclusions
+    -- Exclusions: comma-separated prefixes, e.g. 'ENGR,LAW,POP'
     AND (
         exclusions IS NULL OR trim(exclusions) = ''
         OR NOT EXISTS (
