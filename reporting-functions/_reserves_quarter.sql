@@ -94,8 +94,9 @@ LEFT JOIN LATERAL (
                 ON l_same.term_id = t.id
         WHERE c_same.course_number = courses.course_number
           AND (
+              -- Own listing, OR a Permanent listing for the same course
               l_same.id = courses.course_listing_id
-              OR c_same.course_listing_id <> courses.course_listing_id
+              OR t.name = 'Permanent'
           )
           AND (
               term_name IS NULL OR term_name = ''
