@@ -22,7 +22,7 @@
         },
         {
             "name": "exclusions",
-            "displayName": "Exclude course types — comma-separated flags [POP, LAW, NEW, EMPTY]",
+            "displayName": "Exclude course types — comma-separated flags [POP,LAW,NEW,ENGR]",
             "type": "text",
             "required": false
         },

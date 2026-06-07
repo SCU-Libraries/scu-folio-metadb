@@ -17,8 +17,8 @@ RETURNS TABLE(
     call_number        text,
     instance_title     text,
     checkout_count     bigint,
-    course_listing_id  text,
-    item_id            text,
+    -- course_listing_id  text,
+    -- item_id            text,
     win_start          date,
     win_end            date
 )
@@ -135,13 +135,11 @@ WHERE
     )
     -- Exclusions
     AND (
-        exclusions IS NULL OR (
-            (exclusions NOT ILIKE '%POP%'   OR courses.course_number IS DISTINCT FROM 'POP') AND
-            (exclusions NOT ILIKE '%LAW%'   OR courses.course_number NOT ILIKE 'LAW%') AND
-            (exclusions NOT ILIKE '%NEW%'   OR courses.course_number IS DISTINCT FROM 'NEW') AND
-            (exclusions NOT ILIKE '%FLASH%' OR courses.course_number IS DISTINCT FROM 'FLASH') AND 
-            (exclusions NOT ILIKE '%PRE-LAW%' OR courses.course_number IS DISTINCT FROM 'PRE-LAW') AND 
-            (exclusions NOT ILIKE '%EMPTY%' OR (courses.course_number IS NOT NULL AND courses.course_number <> ''))
+        exclusions IS NULL OR trim(exclusions) = ''
+        OR NOT EXISTS (
+            SELECT 1
+            FROM unnest(string_to_array(upper(exclusions), ',')) AS excl(prefix)
+            WHERE courses.course_number ILIKE trim(excl.prefix) || '%'
         )
     )
 GROUP BY
