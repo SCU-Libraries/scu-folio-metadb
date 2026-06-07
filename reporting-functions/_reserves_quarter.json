@@ -37,6 +37,12 @@
             "displayName": "Filter by course number (exact match)",
             "type": "text",
             "required": false
+        },
+        {
+            "name": "exclude_permanent",
+            "displayName": "Exclude permanent reserves",
+            "type": "text",
+            "required": false
         }
     ]
 }
