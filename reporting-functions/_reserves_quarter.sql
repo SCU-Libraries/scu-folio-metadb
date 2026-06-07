@@ -19,7 +19,9 @@ RETURNS TABLE(
     instance_title     text,
     checkout_count     bigint,
     win_start          date,
-    win_end            date
+    win_end            date,
+    course_listing_id  text,
+    item_id            text
 )
 AS $$
 WITH
@@ -76,10 +78,10 @@ SELECT
     iext.effective_call_number     AS call_number,
     inst.title                     AS instance_title,
     COALESCE(ci_counts.checkout_count, 0) AS checkout_count,
-    courses.course_listing_id,
-    reserves.item_id,
     (SELECT win_start FROM resolved_window) AS win_start,
-    (SELECT win_end   FROM resolved_window) AS win_end
+    (SELECT win_end   FROM resolved_window) AS win_end,
+    courses.course_listing_id,
+    reserves.item_id
 FROM
     folio_courses.coursereserves_courses__t__ courses
 INNER JOIN folio_courses.coursereserves_reserves__t__ reserves
