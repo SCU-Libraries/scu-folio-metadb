@@ -43,13 +43,28 @@ WITH
               AND t.name = term_name
         LIMIT 1
     ),
+    listing_windows AS (
+        SELECT
+            l.id         AS course_listing_id,
+            t.start_date AS term_start,
+            t.end_date   AS term_end
+        FROM folio_courses.coursereserves_courselistings__t__ l
+        INNER JOIN folio_courses.coursereserves_terms__t__ t
+                ON l.term_id = t.id
+    ),
     ci_counts AS (
-        SELECT ci.item_id, COUNT(DISTINCT ci.id) AS checkout_count
+        SELECT
+            r.course_listing_id,
+            ci.item_id,
+            COUNT(DISTINCT ci.id) AS checkout_count
         FROM folio_circulation.check_in__t__ ci
+        INNER JOIN folio_courses.coursereserves_reserves__t__ r
+                ON ci.item_id = r.item_id
+        INNER JOIN listing_windows lw
+                ON r.course_listing_id = lw.course_listing_id
         WHERE ci.item_status_prior_to_check_in = 'Checked out'
-          AND ci.occurred_date_time BETWEEN (SELECT win_start FROM resolved_window)
-                                        AND (SELECT win_end   FROM resolved_window)
-        GROUP BY ci.item_id
+          AND ci.occurred_date_time BETWEEN lw.term_start AND lw.term_end
+        GROUP BY r.course_listing_id, ci.item_id
     )
 SELECT
     CASE
@@ -101,6 +116,7 @@ LEFT JOIN folio_derived.instance_ext inst
        ON hrt.instance_id = inst.instance_id
 LEFT JOIN ci_counts
        ON iext.item_id = ci_counts.item_id
+      AND courses.course_listing_id = ci_counts.course_listing_id
 WHERE
     reserves.item_id IS NOT NULL
     AND (
