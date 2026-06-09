@@ -1,6 +1,7 @@
 {
-    "displayName": "Course Reserves — Quarter Report",
-    "description": "Checkout counts for all courses with active reserves, scoped to a single quarter. Provide either a term name (resolved to dates automatically) or explicit start/end dates. Courses assigned to the 'Permanent' term in FOLIO are included when filtering by quarter and labeled as '[Term], Permanent'. By default only current (active) reserves are shown; enable the historical toggle to include inactive reserve records. When no term name is given, all courses are returned across the full date range.",
+    "displayName": "Course Reserves Quarter Report",
+    "description": "Created by Michael for supervisors to analyze course reserves circulation history.",
+    "instructions":"Displays checkout counts using Lev's circulation history logics with user-defined filters to narrow down course reserves.",
     "parameters": [
         {
             "name": "term_name",
@@ -28,7 +29,7 @@
         },
         {
             "name": "show_historical",
-            "displayName": "Include non-current (inactive) reserve records (1 to toggle ON)",
+            "displayName": "Include historical (inactive) reserve records (1 to toggle ON)",
             "type": "text",
             "required": false
         },

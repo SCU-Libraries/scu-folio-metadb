@@ -1,14 +1,13 @@
---metadb:function _reserves_quarter
+--metadb:function circ_stats_filter_reserves
+DROP FUNCTION IF EXISTS circ_stats_filter_reserves;
 
-DROP FUNCTION IF EXISTS _reserves_quarter;
-
-CREATE FUNCTION _reserves_quarter(
-    term_name           text DEFAULT NULL,
+CREATE FUNCTION circ_stats_filter_reserves(
+    term_name           text DEFAULT NULL,  -- expects exact term name from folio like "2026 Winter Quarter"
     start_date          date DEFAULT '0001-01-01',
     end_date            date DEFAULT '9999-12-31',
-    exclusions          text DEFAULT NULL,
+    exclusions          text DEFAULT NULL,  -- course numbers to exclude from return table
     show_historical     text DEFAULT NULL,  -- '1','true','t','yes','y','on' = include non-current reserves
-    course_number       text DEFAULT NULL,
+    course_number       text DEFAULT NULL,  -- course tag to filter for specifically e.g. ENGR 
     exclude_permanent   text DEFAULT NULL   -- '1','true','t','yes','y','on' = exclude Permanent-term courses
 )
 RETURNS TABLE(
@@ -120,25 +119,27 @@ LEFT JOIN ci_counts
       AND courses.course_listing_id = ci_counts.course_listing_id
 WHERE
     reserves.item_id IS NOT NULL
+    -- show historical reserves 
     AND (
         lower(coalesce(trim(show_historical), '')) IN ('1','true','t','yes','y','on')
         OR reserves.__current = true
     )
+    -- provided term name, else use dates
     AND (
         term_name IS NULL OR term_name = ''
         OR term_resolved.name IS NOT NULL
     )
-    -- Exclude Permanent-term courses when toggled on
+    -- exclude permanent reserves 
     AND (
         lower(coalesce(trim(exclude_permanent), '')) NOT IN ('1','true','t','yes','y','on')
         OR term_resolved.name <> 'Permanent'
     )
-    -- Course number filter
+    -- course number filter
     AND (
         $6 IS NULL OR trim($6) = ''
         OR courses.course_number ILIKE $6 || '%'
     )
-    -- Exclusions: comma-separated prefixes, e.g. 'ENGR,LAW,POP'
+    -- exclusions e.g. 'ENGR,LAW,POP'
     AND (
         exclusions IS NULL OR trim(exclusions) = ''
         OR NOT EXISTS (
