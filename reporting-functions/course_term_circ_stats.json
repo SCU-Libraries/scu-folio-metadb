@@ -8,6 +8,6 @@
             "displayName": "Term name (or UUID)",
             "type": "text",
             "required": false
-        },
+        }
     ]
 }
