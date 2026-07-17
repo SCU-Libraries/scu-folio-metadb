@@ -1,0 +1,13 @@
+{
+    "displayName": "Circulation Counts for Course Reserve Items by Term",
+    "description": "Gathers all items for a given term and calculates their circulation counts. The term names are available at [ https://scu.folio.indexdata.com/settings/cr/terms ].",
+    "instructions": "Enter a term name (or UUID).",
+    "parameters": [
+        {
+            "name": "term_name",
+            "displayName": "Term name (or UUID)",
+            "type": "text",
+            "required": false
+        },
+    ]
+}
