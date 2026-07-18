@@ -6,7 +6,7 @@ DROP FUNCTION IF EXISTS course_term_circ_stats;
 -- item title, item call number. All null values should be replaced by empty values.
 
 CREATE OR REPLACE FUNCTION course_term_circ_stats (
-	term_name text DEFAULT ''  -- expects exact term name from folio like "2026 Winter Quarter" or UUID
+	term_name text -- expects exact term name from folio like "2026 Winter Quarter" or UUID
 )
 
 RETURNS TABLE(
