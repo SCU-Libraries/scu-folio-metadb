@@ -191,9 +191,3 @@ $$
 LANGUAGE sql
 STABLE
 PARALLEL SAFE;
-
---		cls.cls_start,
---		crr_items.crr_istart,
---		cls.cls_end,
---		crr_items.crr_iend,
---			lower(trim(trm.jsonb->>'name')) = lower(trim('2026 Winter Quarter'))
