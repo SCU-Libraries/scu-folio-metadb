@@ -1,0 +1,6 @@
+{
+    "displayName": "Circulation Counts for Current Permanent Reserve Items",
+    "description": "Calculates circulation counts only for current permanent reserve items.",
+    "instructions": "This report does not accept any user inputs.",
+    "parameters": []
+}
