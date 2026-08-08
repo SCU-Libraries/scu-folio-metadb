@@ -1,0 +1,167 @@
+--metadb:function circ_stats_filter_reserves
+DROP FUNCTION IF EXISTS circ_stats_filter_reserves;
+
+CREATE FUNCTION circ_stats_filter_reserves(
+    term_name           text DEFAULT NULL,  -- expects exact term name from folio like "2026 Winter Quarter"
+    start_date          date DEFAULT '0001-01-01',
+    end_date            date DEFAULT '9999-12-31',
+    exclusions          text DEFAULT NULL,  -- course numbers to exclude from return table
+    show_historical     text DEFAULT NULL,  -- '1','true','t','yes','y','on' = include non-current reserves
+    course_number       text DEFAULT NULL,  -- course tag to filter for specifically e.g. ENGR 
+    exclude_permanent   text DEFAULT NULL   -- '1','true','t','yes','y','on' = exclude Permanent-term courses
+)
+RETURNS TABLE(
+    course_term        text,
+    course_number      text,
+    item_barcode       text,
+    call_number        text,
+    instance_title     text,
+    checkout_count     bigint,
+    win_start          date,
+    win_end            date,
+    course_listing_id  text,
+    item_id            text
+)
+AS $$
+WITH
+    resolved_window AS (
+        SELECT
+            CASE
+                WHEN trim(term_name) IS NOT NULL AND trim(term_name) <> ''
+                THEN t.start_date
+                ELSE $2
+            END AS win_start,
+            CASE
+                WHEN trim(term_name) IS NOT NULL AND trim(term_name) <> ''
+                THEN t.end_date
+                ELSE $3
+            END AS win_end
+        FROM (SELECT 1) dummy
+        LEFT JOIN folio_courses.coursereserves_terms__t__ t
+               ON trim(term_name) IS NOT NULL
+              AND trim(term_name) <> ''
+              AND t.name = term_name
+        LIMIT 1
+    ),
+    listing_windows AS (
+        SELECT
+            l.id         AS course_listing_id,
+            t.start_date AS term_start,
+            t.end_date   AS term_end
+        FROM folio_courses.coursereserves_courselistings__t__ l
+        INNER JOIN folio_courses.coursereserves_terms__t__ t
+                ON l.term_id = t.id
+    ),
+    ci_counts AS (
+        SELECT
+            r.course_listing_id,
+            ci.item_id,
+            COUNT(DISTINCT ci.id) AS checkout_count
+        FROM folio_circulation.check_in__t__ ci
+        INNER JOIN folio_courses.coursereserves_reserves__t__ r
+                ON ci.item_id = r.item_id
+        INNER JOIN listing_windows lw
+                ON r.course_listing_id = lw.course_listing_id
+        WHERE ci.item_status_prior_to_check_in = 'Checked out'
+          AND ci.occurred_date_time BETWEEN lw.term_start AND lw.term_end
+        GROUP BY r.course_listing_id, ci.item_id
+    )
+SELECT
+    CASE
+        WHEN term_resolved.name = 'Permanent' AND trim(term_name) IS NOT NULL AND trim(term_name) <> ''
+        THEN term_name || ', Permanent'
+        ELSE term_resolved.name
+    END                            AS course_term,
+    courses.course_number,
+    iext.barcode                   AS item_barcode,
+    iext.effective_call_number     AS call_number,
+    inst.title                     AS instance_title,
+    COALESCE(ci_counts.checkout_count, 0) AS checkout_count,
+    (SELECT win_start FROM resolved_window) AS win_start,
+    (SELECT win_end   FROM resolved_window) AS win_end,
+    courses.course_listing_id,
+    reserves.item_id
+FROM
+    folio_courses.coursereserves_courses__t__ courses
+INNER JOIN folio_courses.coursereserves_reserves__t__ reserves
+        ON courses.course_listing_id = reserves.course_listing_id
+LEFT JOIN LATERAL (
+        SELECT t.name
+        FROM folio_courses.coursereserves_courses__t__ c_same
+        INNER JOIN folio_courses.coursereserves_courselistings__t__ l_same
+                ON c_same.course_listing_id = l_same.id
+        INNER JOIN folio_courses.coursereserves_terms__t__ t
+                ON l_same.term_id = t.id
+        WHERE c_same.course_number = courses.course_number
+          AND (
+              l_same.id = courses.course_listing_id
+              OR t.name = 'Permanent'
+          )
+          AND (
+              term_name IS NULL OR term_name = ''
+              OR t.name = term_name
+              OR t.name = 'Permanent'
+          )
+        ORDER BY
+            CASE WHEN l_same.id = courses.course_listing_id THEN 0 ELSE 1 END,
+            CASE WHEN t.name = term_name THEN 0 ELSE 1 END,
+            t.start_date DESC
+        LIMIT 1
+) term_resolved ON true
+LEFT JOIN folio_derived.item_ext iext
+       ON reserves.item_id = iext.item_id
+LEFT JOIN folio_derived.holdings_ext hrt
+       ON iext.holdings_record_id = hrt.holdings_id
+LEFT JOIN folio_derived.instance_ext inst
+       ON hrt.instance_id = inst.instance_id
+LEFT JOIN ci_counts
+       ON iext.item_id = ci_counts.item_id
+      AND courses.course_listing_id = ci_counts.course_listing_id
+WHERE
+    reserves.item_id IS NOT NULL
+    -- show historical reserves 
+    AND (
+        lower(coalesce(trim(show_historical), '')) IN ('1','true','t','yes','y','on')
+        OR reserves.__current = true
+    )
+    -- provided term name, else use dates
+    AND (
+        term_name IS NULL OR term_name = ''
+        OR term_resolved.name IS NOT NULL
+    )
+    -- exclude permanent reserves 
+    AND (
+        lower(coalesce(trim(exclude_permanent), '')) NOT IN ('1','true','t','yes','y','on')
+        OR term_resolved.name <> 'Permanent'
+    )
+    -- course number filter
+    AND (
+        $6 IS NULL OR trim($6) = ''
+        OR courses.course_number ILIKE $6 || '%'
+    )
+    -- exclusions e.g. 'ENGR,LAW,POP'
+    AND (
+        exclusions IS NULL OR trim(exclusions) = ''
+        OR NOT EXISTS (
+            SELECT 1
+            FROM unnest(string_to_array(upper(exclusions), ',')) AS excl(prefix)
+            WHERE courses.course_number ILIKE trim(excl.prefix) || '%'
+        )
+    )
+GROUP BY
+    courses.course_listing_id,
+    courses.course_number,
+    reserves.item_id,
+    iext.barcode,
+    iext.effective_call_number,
+    inst.title,
+    term_resolved.name,
+    ci_counts.checkout_count,
+    win_start,
+    win_end
+ORDER BY
+    course_term
+$$
+LANGUAGE sql
+STABLE
+PARALLEL SAFE;
