@@ -1,9 +1,9 @@
 --metadb:function suppressed_with_open_request
 DROP FUNCTION IF EXISTS suppressed_with_open_request;
 
--- Output instance and/or item HRID values for suppressed records with open requests
--- "Permanent" term. Sorted by course name, number, item start date, item title,
--- item call number. All null values should be replaced by empty values.
+-- Output instance and/or item HRID values for suppressed records with open requests.
+-- Sorted by request type, instance HRID, item HRID. All null values should be replaced
+-- by empty values.
 
 CREATE OR REPLACE FUNCTION suppressed_with_open_request (
 )
@@ -51,7 +51,7 @@ WHERE
 	OR fi_in1.jsonb->>'staffSuppress' = 'true')
 	AND fc_r.jsonb->>'status' ~* '^open')
 ORDER BY
-	reqType, instancehrid, itemhrid
+	request_type, instance_hrid, item_hrid
 
 $$
 LANGUAGE sql
