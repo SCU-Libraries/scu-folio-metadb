@@ -22,7 +22,7 @@ RETURNS TABLE(
 
 AS $$
 SELECT
-	fc_r.id AS request_id,
+	(fc_r.id)::TEXT AS request_id,
 	fc_r.jsonb->>'requestLevel' AS request_type,
 	coalesce(fi_in.jsonb->>'hrid', fi_in1.jsonb->>'hrid') AS instance_hrid,
 	coalesce(fi_it.jsonb->>'hrid', '') AS item_hrid,
