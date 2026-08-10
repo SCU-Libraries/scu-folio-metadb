@@ -1,0 +1,6 @@
+{
+    "displayName": "Display Suppressed Inventory with Open Requests",
+    "description": "Displays discovery or staff suppressed instance and/or item records that have open requests.",
+    "instructions": "This report does not accept any user inputs.",
+    "parameters": []
+}
