@@ -26,8 +26,8 @@ SELECT
 	fc_r.jsonb->>'requestLevel' AS request_type,
 	coalesce(fi_in.jsonb->>'hrid', fi_in1.jsonb->>'hrid') AS instance_hrid,
 	coalesce(fi_it.jsonb->>'hrid', '') AS item_hrid,
-	coalesce(fi_in.jsonb->>'discoverySuppress', fi_in1.jsonb->>'discoverySuppress') AS instance_supp,
-	coalesce(fi_in.jsonb->>'staffSuppress', fi_in1.jsonb->>'staffSuppress') AS instance_staff_supp,
+	coalesce(fi_in.jsonb->>'discoverySuppress', fi_in1.jsonb->>'discoverySuppress', '') AS instance_supp,
+	coalesce(fi_in.jsonb->>'staffSuppress', fi_in1.jsonb->>'staffSuppress', '') AS instance_staff_supp,
 	coalesce(fi_hr.jsonb->>'discoverySuppress', '') AS holding_supp,
 	coalesce(fi_it.jsonb->>'discoverySuppress', '') AS item_supp
 FROM
