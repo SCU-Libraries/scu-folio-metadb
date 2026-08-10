@@ -11,7 +11,6 @@ CREATE OR REPLACE FUNCTION suppressed_with_open_request (
 RETURNS TABLE(
 	request_id text,
 	request_type text,
-	course_number text,
 	instance_hrid text,
 	item_hrid text,
 	instance_supp text,
