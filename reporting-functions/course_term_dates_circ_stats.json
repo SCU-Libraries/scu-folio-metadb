@@ -1,0 +1,25 @@
+{
+    "displayName": "Circulation Counts for Course Reserve Items by Term or Dates",
+    "description": "Gathers all items for a given term and calculates their circulation counts. The term names are available at [ https://scu.folio.indexdata.com/settings/cr/terms ]. An optional date range can be added for permanent reserves only.",
+    "instructions": "Enter a term name (or UUID).",
+    "parameters": [
+        {
+            "name": "term_name",
+            "displayName": "Term name (or UUID)",
+            "type": "text",
+            "required": true
+        },
+        {
+            "name": "date_one",
+            "displayName": "Earliest date of circulation activity (permanent term only)",
+            "type": "date",
+            "required": false
+        },
+        {
+            "name": "date_two",
+            "displayName": "Latest date of circulation activity (permanent term only)",
+            "type": "date",
+            "required": false
+        }
+    ]
+}
