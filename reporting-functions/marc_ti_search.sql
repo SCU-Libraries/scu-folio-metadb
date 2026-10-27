@@ -21,15 +21,6 @@ RETURNS TABLE(
 	f_content text
 )
 
-RETURNS TABLE(
-	instance_hrid text,
-	marc_tag text,
-	ind_1 text,
-	ind_2 text,
-	subfield text,
-	f_content text
-)
-
 AS $$
 WITH
 	sparams AS (
