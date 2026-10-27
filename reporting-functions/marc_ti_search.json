@@ -1,0 +1,37 @@
+{
+    "displayName": "Search by MARC tag, indicators (optional), subfield (optional), and content",
+    "description": "MARC searching is not yet available in Lists",
+    "instructions": "Enter a MARC tag, optional indicators, optional subfield, and text.",
+    "parameters": [
+        {
+            "name": "mtag",
+            "displayName": "MARC tag [001-999] (Required)",
+            "type": "text",
+            "required": true
+        },
+        {
+            "name": "ind1",
+            "displayName": "First Indicator [0-9] (Optional)",
+            "type": "text",
+            "required": false
+        },
+        {
+            "name": "ind2",
+            "displayName": "Second Indicator [0-9] (Optional)",
+            "type": "text",
+            "required": false
+        },
+        {
+            "name": "subf",
+            "displayName": "Subfield [0-9a-z] (Optional)",
+            "type": "text",
+            "required": false
+        },
+        {
+            "name": "fcontent",
+            "displayName": "Field Content (Required)",
+            "type": "text",
+            "required": true
+        }
+    ]
+}
