@@ -30,19 +30,19 @@ WITH
 				ELSE mtag
 			END AS mtag,
 			CASE
-				WHEN (ind1 !~* '^[ 0-9]$') THEN '*'
+				WHEN (ind1 !~* '^[ 0-9]$') THEN '.'
 				ELSE ind1
 			END AS ind1,
 			CASE
-				WHEN (ind2 !~* '^[ 0-9]$') THEN '*'
+				WHEN (ind2 !~* '^[ 0-9]$') THEN '.'
 				ELSE ind2
 			END AS ind2,
 			CASE
-				WHEN (lower(trim(subf)) !~* '^[0-9a-z]$') THEN '*'
+				WHEN (lower(trim(subf)) !~* '^[0-9a-z]$') THEN '.'
 				ELSE lower(trim(subf))
 			END AS subf,
 			CASE
-				WHEN (lower(trim(fcontent)) !~* '^.+') THEN '*'
+				WHEN (lower(trim(fcontent)) !~* '^.+') THEN '.'
 				ELSE lower(trim(fcontent))
 			END AS fcontent
 	)
