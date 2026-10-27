@@ -3,23 +3,22 @@ DROP FUNCTION IF EXISTS marc_ti_search;
 
 -- Output instance HRID values for records that match MARC tag, indicators, subfield, and 
 -- field content. Sorted by field content then by instance
---'856' AS mtag,
---'4' AS ind1,
---'0' AS ind2,
---'u' AS subf,
---'ebsco' AS fcontent
 
 CREATE OR REPLACE FUNCTION marc_ti_search (
---	mtag text DEFAULT '001',
---	ind1 text DEFAULT '',
---	ind2 text DEFAULT '',
---	subf text DEFAULT '',
---	fcontent text DEFAULT ''
-	mtag text DEFAULT '856',
-	ind1 text DEFAULT '4',
-	ind2 text DEFAULT '0',
-	subf text DEFAULT 'u',
-	fcontent text DEFAULT 'ebsco'
+	mtag text DEFAULT '001',
+	ind1 text DEFAULT '',
+	ind2 text DEFAULT '',
+	subf text DEFAULT '',
+	fcontent text DEFAULT ''
+)
+
+RETURNS TABLE(
+	instance_hrid text,
+	marc_tag text,
+	ind_1 text,
+	ind_2 text,
+	subfield text,
+	f_content text
 )
 
 RETURNS TABLE(
